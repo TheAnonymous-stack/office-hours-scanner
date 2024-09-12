@@ -2,23 +2,6 @@
 import OpenAI from 'openai';
 import fs from 'fs';
 
-// const gpt = new OpenAI({
-//     apiKey: process.env.apiKey,
-// });
-
-// const query = async (urls: String) => {
-//     const res = await gpt.chat.completions.create({
-//       model: 'gpt-4o-mini',
-//       messages: [{
-//         role: 'user',
-//         content: 'Create a PDF file listing the office hours from the URLs: ${urls}. Title the file "Office Hours". Bolden course names. Order by day of the week, followed by the hours, instructor\'s name, location.' 
-//       }]
-//     })
-//     res.then((res) => console.log(res));
-//   }
-
-// export default {query};
-
 const openai = new OpenAI({
   apiKey: process.env.apiKey
 });
@@ -45,7 +28,7 @@ async function getHours(filePaths: Array<string>) {
       messages: [
         {
           role: 'user',
-          content: 'Summarize the office hours. Bolden course names. Order by day of the week, followed by the hours, instructor\'s name, location.',
+          content: 'Summarize the office hours. Bolden course names. Order by day of the week, followed by the hours, instructor\'s name, location. If no Office Hours are found or if Office Hours are listed as TBA, respond as follows \' No Office Hours found.\' ',
           attachments: attachment_files,
         }
       ]
@@ -80,11 +63,7 @@ async function getHours(filePaths: Array<string>) {
   
 };
 
-function helloWorld() {
-  return 'hello world';
-}
-
-export { getHours, helloWorld }
+export { getHours }
 
 
 

@@ -5,7 +5,6 @@ import UploadForm from './components/uploadForm';
 import Markdown from 'react-markdown';
 import LoadingModal from './components/loadingModal';
 import { getHours } from './utils/chatgpt';
-
 export default function HomePage() {
   const [text, setText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,14 +17,14 @@ export default function HomePage() {
   }, [text]);
 
   async function handleDelete(fileName: String, filePath: String) {
-    console.log(filePath);
-    const response = await fetch('/api/file', {
-        method: 'DELETE',
-        body: filePath,
-    }) ;
+    const formData = new FormData();
+    formData.append('path', filePath);
+    const response = await fetch("/api/file", {
+        method: "DELETE",
+        body: formData,
+    });
     setFileUploaded(fileUploaded.filter(f => f !== fileName));
     setPaths(paths.filter(p => p !== filePath));
-    console.log(paths);
   }
   
   return (
@@ -38,9 +37,14 @@ export default function HomePage() {
           <h2 className='text-2xl font-bold mb-5'>Files Uploaded:</h2>
           {
             fileUploaded.map((f) => 
-            <div className='flex flex-row justify-between w-1/2 border-black border-b py-2 mb-2'>
-              <p key={f} class='font-semibold'>{f}</p>
-              <button className="hover:text-red-500 hover:font-bold" onClick={() => handleDelete(f, paths.find(p => p.includes(f)))}>Remove</button>
+            <div key={f} className='flex flex-row justify-between w-1/2 border-black border-b py-2 mb-2'>
+              <p class='font-semibold'>{f}</p>
+              <button 
+                className="hover:text-red-500 hover:font-bold" 
+                onClick={() => {
+                  handleDelete(f, paths.find(p => p.includes(f)))
+                }
+                 }>Remove</button>
             </div>
             )
           }
@@ -51,11 +55,11 @@ export default function HomePage() {
             <button 
                 className='flex justify-center align-center mt-1 py-4 px-10 rounded-md bg-blue-600 text-white font-semibold'
                 onClick={() => {
-                // const hours = getHours(paths);
-                // setIsModalOpen(true);
-                // hours.then((res) => {
-                //     setText(res)
-                // })
+                const hours = getHours(paths);
+                setIsModalOpen(true);
+                hours.then((res) => {
+                    setText(res)
+                })
                 
                 }}>Scan Office Hours
             </button>
