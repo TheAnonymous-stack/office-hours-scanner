@@ -20,5 +20,8 @@ async function POST(req: Request) {
     return NextResponse.json({ status: 'fail', error: e});
   }
 }
-
-export { POST }
+async function DELETE(req: Request) {
+  const filename = req.body;
+  console.log(filename);
+}
+export { POST, DELETE }

@@ -9,7 +9,6 @@ import { getHours } from './utils/chatgpt';
 export default function HomePage() {
   const [text, setText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [fileStandby, setFileStandby] = useState([]);
   const [fileUploaded, setFileUploaded] = useState([]);
   const [paths, setPaths] = useState([]);
   useEffect(() => {
@@ -17,20 +16,31 @@ export default function HomePage() {
       setIsModalOpen(false);
     }
   }, [text]);
+
+  async function handleDelete(fileName: String, filePath: String) {
+    console.log(filePath);
+    const response = await fetch('/api/file', {
+        method: 'DELETE',
+        body: filePath,
+    }) ;
+    setFileUploaded(fileUploaded.filter(f => f !== fileName));
+    setPaths(paths.filter(p => p !== filePath));
+    console.log(paths);
+  }
   
   return (
     <div className="flex flex-col gap-5 p-10">
-      <h1 class="flex justify-center text-4xl font-bold">Office Hours Scanner</h1>
+      <h1 className="flex justify-center text-4xl font-bold">Office Hours Scanner</h1>
       <UploadForm paths={paths} fileUploaded={fileUploaded}  setIsModalOpen={setIsModalOpen} setFileUploaded={setFileUploaded} setPaths={setPaths}/>
       {
         fileUploaded.length > 0 && 
-        <div class='flex flex-col'>
-          <h2 class='text-2xl font-bold mb-5'>Files Uploaded:</h2>
+        <div className='flex flex-col'>
+          <h2 className='text-2xl font-bold mb-5'>Files Uploaded:</h2>
           {
             fileUploaded.map((f) => 
-            <div class='flex flex-row justify-between w-1/2 border-black border-b py-2 mb-2'>
+            <div className='flex flex-row justify-between w-1/2 border-black border-b py-2 mb-2'>
               <p key={f} class='font-semibold'>{f}</p>
-              <button class="hover:text-red-500 hover:font-bold">Remove</button>
+              <button className="hover:text-red-500 hover:font-bold" onClick={() => handleDelete(f, paths.find(p => p.includes(f)))}>Remove</button>
             </div>
             )
           }
@@ -39,7 +49,7 @@ export default function HomePage() {
       {
         paths.length > 0 && 
             <button 
-                class='flex justify-center align-center mt-1 py-4 px-10 rounded-md bg-blue-600 text-white font-semibold'
+                className='flex justify-center align-center mt-1 py-4 px-10 rounded-md bg-blue-600 text-white font-semibold'
                 onClick={() => {
                 // const hours = getHours(paths);
                 // setIsModalOpen(true);
@@ -52,7 +62,7 @@ export default function HomePage() {
       }
       {
         text.length > 0 && 
-        <div class="p-2 mt-5 border rounded-xl w-2/3">
+        <div className="p-2 mt-5 border rounded-xl w-2/3">
           <Markdown>{text}</Markdown>
         </div>
       }

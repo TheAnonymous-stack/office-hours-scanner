@@ -27,12 +27,6 @@ export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFil
         
     }
 
-    // async function handleDelete(filename: string) {
-    //     const response = await fetch('/api/upload', {
-    //         method: 'DELETE',
-    //         body: 
-    //     }) 
-    // }
     return (
         <div class="flex flex-col gap-5">
             <h1 class='text-2xl font-bold'>Upload Course Syllabuses Here!</h1>
