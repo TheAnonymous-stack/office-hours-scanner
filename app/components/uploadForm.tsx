@@ -8,7 +8,8 @@ export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFil
             const files = fileInput?.current?.files;
             const pathsToBeUploaded = [];
             const fileToBeUploaded=[];
-            for (let file of files) {
+            if (files) {
+                for (let file of files) {
                 fileToBeUploaded.push(file.name);
                 const formData = new FormData();
                 formData.append('file', file);
@@ -22,6 +23,8 @@ export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFil
             }
             paths.length > 0 ? setPaths(pathsToBeUploaded.concat([...paths])) : setPaths(pathsToBeUploaded);
             fileUploaded.length > 0 ? setFileUploaded(fileToBeUploaded.concat([...fileUploaded])) : setFileUploaded(fileToBeUploaded);
+            }
+
         }
         
     }
