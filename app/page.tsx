@@ -23,7 +23,7 @@ export default function HomePage() {
     setPaths(paths.filter(p => p !== filePath));
   }
 
-  async function handleDeleteAll(filePaths) {
+  async function handleDeleteAll(filePaths: string[]) {
     for (let path of filePaths) {
       const formData = new FormData();
       formData.append('path', path);
