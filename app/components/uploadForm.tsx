@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFileUploaded, setPaths}: {paths:string[], fileUploaded:string[], setIsModalOpen:(args: Boolean) => void, setFileUploaded: (...args: Array<string>[]) => void, setPaths:(...args: Array<string>[]) => void}) {
     const fileInput = useRef<HTMLInputElement>(null);
-    async function handleSelect(evt: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    async function handleSelect(evt: ChangeEvent<HTMLInputElement>) {
         if (fileInput) {
             const files = fileInput?.current?.files;
             const pathsToBeUploaded = [];
@@ -33,7 +33,7 @@ export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFil
         <div className="flex flex-col gap-5">
             <h1 className='text-2xl font-bold'>Upload Course Syllabuses Here!</h1>
             <div className='flex flex-row gap-5'>
-                <input className='pt-2' type='file' name='file' ref={fileInput} multiple onChange={handleSelect}/>
+                <input className='pt-2' type='file' name='file' ref={fileInput} multiple onChange={(e) => handleSelect(e)}/>
             </div>    
         </div>
     );
