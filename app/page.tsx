@@ -57,10 +57,10 @@ export default function HomePage() {
               <button 
                 className="hover:text-red-500 hover:font-bold" 
                 onClick={() => {
-                  if (paths.length > 0) {
-                    handleDeleteSingle(f, paths.find(p => p.includes(f)))
-                  }
-                  
+                    let path = paths.find(p => p.includes(f))
+                    if (path) {
+                      handleDeleteSingle(f, path);
+                    }
                 }
                  }>Remove</button>
             </div>
