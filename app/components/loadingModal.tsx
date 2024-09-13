@@ -1,5 +1,5 @@
 
-const LoadingModal = ({ isModalOpen }) => {
+const LoadingModal = ({ isModalOpen: boolean }) => {
   if (!isModalOpen) return null;
   return (
     <div className="fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-neutral-300 z-auto">
