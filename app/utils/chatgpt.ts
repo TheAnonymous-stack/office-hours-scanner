@@ -9,10 +9,11 @@ async function getHours(filePaths: Array<string>) {
   if (filePaths.length > 0) {
     const assistant = await openai.beta.assistants.create({
     name: 'File Scanner',
-    instructions: "You summarize the office hours from the course syllabuses uploaded. Bolden course names. Order by day of the week, followed by the hours, instructor\'s name, location.",
+    instructions: "You summarize the office hours from the course syllabuses uploaded. Order by day of the week, followed by course name in bold, the hours, instructor\'s name, location.",
     model: "gpt-4o-mini",
     tools: [{ type: 'file_search'}],
     });
+
     const attachment_files = [];
     for (let filePath of filePaths) {
       const f = await openai.files.create({
@@ -24,11 +25,12 @@ async function getHours(filePaths: Array<string>) {
         tools: [{ type: 'file_search'}]
       });
     }
+
     const thread = await openai.beta.threads.create({
       messages: [
         {
           role: 'user',
-          content: 'Summarize the office hours. Bolden course names. Order by day of the week, followed by the hours, instructor\'s name, location. If no Office Hours are found or if Office Hours are listed as TBA, respond as follows \' No Office Hours found.\' ',
+          content: 'Summarize the office hours. Order by day of the week, followed by course name in bold, the hours, instructor\'s name, location. For any course whose Office Hours are not found or listed as TBA, respond as follows \' No Office Hours found.\' Add 2 new lines for each new day of the week. Add a new line for citation at the bottom',
           attachments: attachment_files,
         }
       ]
@@ -56,14 +58,33 @@ async function getHours(filePaths: Array<string>) {
         }
         index++;
       }
-      console.log('text.value is', text.value);
       return text.value;
   }
   }
   
 };
 
-export { getHours }
+async function clearStorage() {
+  const fileList = await openai.files.list();
+  for await (const file of fileList) {
+      const file_id = file.id;
+      openai.files.del(file_id);
+  }
+  
+  const vectorStoreList = await openai.beta.vectorStores.list();
+  for await (const store of vectorStoreList) {
+      const store_id = store.id;
+      openai.beta.vectorStores.del(store_id);
+  }
+  
+  const assistantList = await openai.beta.assistants.list();
+    for await (const assistant of assistantList) {
+      const assistant_id = assistant.id;
+      openai.beta.assistants.del(assistant_id);
+  }
+}
+
+export { getHours, clearStorage }
 
 
 

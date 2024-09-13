@@ -28,10 +28,10 @@ export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFil
     }
 
     return (
-        <div class="flex flex-col gap-5">
-            <h1 class='text-2xl font-bold'>Upload Course Syllabuses Here!</h1>
-            <div class='flex flex-row gap-5'>
-                <input class='pt-2' type='file' name='file' ref={fileInput} multiple onChange={handleSelect}/>
+        <div className="flex flex-col gap-5">
+            <h1 className='text-2xl font-bold'>Upload Course Syllabuses Here!</h1>
+            <div className='flex flex-row gap-5'>
+                <input className='pt-2' type='file' name='file' ref={fileInput} multiple onChange={handleSelect}/>
             </div>    
         </div>
     );
