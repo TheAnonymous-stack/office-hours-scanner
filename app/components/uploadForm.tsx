@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { helloWorld } from '../utils/chatgpt';
 
 export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFileUploaded, setPaths}) {
     const fileInput = useRef<HTMLInputElement>(null);
