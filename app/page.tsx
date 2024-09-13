@@ -57,7 +57,10 @@ export default function HomePage() {
               <button 
                 className="hover:text-red-500 hover:font-bold" 
                 onClick={() => {
-                  handleDeleteSingle(f, paths.find(p => p.includes(f)))
+                  if (paths.length > 0) {
+                    handleDeleteSingle(f, paths.find(p => p.includes(f)))
+                  }
+                  
                 }
                  }>Remove</button>
             </div>
