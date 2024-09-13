@@ -76,7 +76,7 @@ export default function HomePage() {
                 const hours = getHours(paths);
                 setIsModalOpen(true);
                 hours.then((res) => {
-                    setText(res)
+                    if (res) setText(res);
                 })
                 
                 }}>Scan Office Hours
