@@ -12,7 +12,7 @@ export default function HomePage() {
   const [fileUploaded, setFileUploaded] = useState([]);
   const [paths, setPaths] = useState([]);
 
-  async function handleDeleteSingle(fileName: String, filePath: String) {
+  async function handleDeleteSingle(fileName: string, filePath: string) {
     const formData = new FormData();
     formData.append('path', filePath);
     const response = await fetch("/api/file", {
