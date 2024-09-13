@@ -23,7 +23,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const formData = await req.formData();
-    const filePath = formData.get('path');
+    const filePath = formData.get('path') as PathLike;
     fs.unlink(filePath);
     return NextResponse.json({ status: 'success'});
   } catch(e) {
