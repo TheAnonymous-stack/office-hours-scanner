@@ -7,10 +7,10 @@ import LoadingModal from './components/loadingModal';
 import { getHours, clearStorage } from './utils/chatgpt';
 
 export default function HomePage() {
-  const [text, setText] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [fileUploaded, setFileUploaded] = useState([]);
-  const [paths, setPaths] = useState([]);
+  const [text, setText] = useState<string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [fileUploaded, setFileUploaded] = useState<Array<string>>([]);
+  const [paths, setPaths] = useState<Array<string>>([]);
 
   async function handleDeleteSingle(fileName: string, filePath: string) {
     const formData = new FormData();
