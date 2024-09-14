@@ -89,9 +89,6 @@ export default function HomePage() {
         </div>
       }
       <LoadingModal isModalOpen={isModalOpen}/>
-      <button onClick={() => {
-        clearStorage();
-      }}>Clear Storage</button>
     </div>
   )
 }
