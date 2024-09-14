@@ -5,7 +5,7 @@ import fs from 'fs';
 const openai = new OpenAI({
   apiKey: process.env.apiKey
 });
-async function getHours(filePaths: Array<string>) {
+async function getHours(filePaths) {
   if (filePaths.length > 0) {
     const assistant = await openai.beta.assistants.create({
     name: 'File Scanner',

@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import fs from 'node:fs/promises';
 import path from 'path';
 
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ status: 'fail', error: e});
   }
 }
-export async function DELETE(req: Request) {
+export async function DELETE(req) {
   try {
     const formData = await req.formData();
     const filePath = formData.get('path') as string;

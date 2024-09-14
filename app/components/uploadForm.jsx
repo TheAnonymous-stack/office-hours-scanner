@@ -1,9 +1,9 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 
-export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFileUploaded, setPaths}: {paths:Array<string>, fileUploaded:string[], setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>, setFileUploaded: React.Dispatch<React.SetStateAction<Array<string>>>, setPaths:React.Dispatch<React.SetStateAction<Array<string>>>}) {
-    const fileInput = useRef<HTMLInputElement>(null);
-    async function handleSelect(evt: React.ChangeEvent<HTMLInputElement>) {
+export default function UploadForm({ paths, fileUploaded, setIsModalOpen, setFileUploaded, setPaths}) {
+    const fileInput = useRef(null);
+    async function handleSelect(evt) {
         if (fileInput) {
             const files = fileInput?.current?.files;
             const pathsToBeUploaded = [];
