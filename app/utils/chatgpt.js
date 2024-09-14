@@ -46,7 +46,7 @@ async function getHours(filePaths) {
     if (message && message.content[0].type === 'text') {
       const { text } = message.content[0];
       const { annotations } = text;
-      const citations: string[] = [];
+      const citations = [];
 
       let index = 0;
       for (let annotation of annotations) {

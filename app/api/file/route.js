@@ -6,7 +6,7 @@ import path from 'path';
 export async function POST(req) {
   try {
     const formData = await req.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file');
     const arrayBuffer = await file.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
     await fs.writeFile(path.join(process.cwd(),`/public/upload/${file.name}`), buffer);
@@ -23,7 +23,7 @@ export async function POST(req) {
 export async function DELETE(req) {
   try {
     const formData = await req.formData();
-    const filePath = formData.get('path') as string;
+    const filePath = formData.get('path');
     fs.unlink(filePath);
     return NextResponse.json({ status: 'success'});
   } catch(e) {
