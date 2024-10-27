@@ -6,6 +6,7 @@ const openai = new OpenAI({
   apiKey: process.env.apiKey
 });
 async function getHours(filePaths) {
+  console.log(filePaths);
   if (filePaths.length > 0) {
     const assistant = await openai.beta.assistants.create({
     name: 'File Scanner',
@@ -13,6 +14,7 @@ async function getHours(filePaths) {
     model: "gpt-4o-mini",
     tools: [{ type: 'file_search'}],
     });
+    console.log("Assistant created sucessfully");
 
     const attachment_files = [];
     for (let filePath of filePaths) {
@@ -35,6 +37,7 @@ async function getHours(filePaths) {
         }
       ]
     });
+    console.log("thread created successfully");
     const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
       assistant_id: assistant.id,
     });
@@ -45,6 +48,7 @@ async function getHours(filePaths) {
     const message = messages.data.pop();
     if (message && message.content[0].type === 'text') {
       const { text } = message.content[0];
+      console.log("response received");
       const { annotations } = text;
       const citations = [];
 
