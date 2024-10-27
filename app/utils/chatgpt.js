@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import fs from 'fs';
 
 const openai = new OpenAI({
-  apiKey: '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';
+  apiKey: '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'
 });
 async function getHours(filePaths) {
   console.log(filePaths);
