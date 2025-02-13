@@ -1,4 +1,5 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import formidable from "formidable";
 import fs from "fs";
 
@@ -28,6 +29,8 @@ async function parseForm(req) {
     });
 }
 
+
+
 export default async function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).json({message: "Method not allowed"});
@@ -51,18 +54,33 @@ export default async function handler(req, res) {
                     ContentType: file.mimetype,
                 };
 
-                return s3Client.send(new PutObjectCommand(params));
+                // Uploade file to S3
+                await s3Client.send(new PutObjectCommand(params));
+
+                const getObjectParams = {
+                    Bucket: process.env.AWS_S3_BUCKET,
+                    Key: `uploads/${file.originalFilename}`,
+                };
+
+                const signedUrl = await getSignedUrl(s3Client, new GetObjectCommand(getObjectParams), { expiresIn: 600 });
+
+                return {
+                    fileName: file.originalFilename,
+                    signedUrl,
+                };
             });
 
-            await Promise.all(uploadPromises);
+            const preSignedUrls = await Promise.all(uploadPromises);
 
-            res.status(200).json({message: "Files uploaded succesfully"});
+            res.status(200).json({
+                message: "Files uploaded successfully",
+                preSignedUrls,
+            });
         } catch (error) {
             console.error("Error uploading files:", error);
             res.status(500).json({
                 message: "Error uploading files",
                 error: error.message
             });
-        }
-    
+        } 
 }

@@ -1,68 +1,96 @@
 'use server';
 import OpenAI from 'openai';
 import fs from 'fs';
+import axios from "axios";
 
 const openai = new OpenAI({
   apiKey: process.env.apiKey
 });
-async function getHours(filePaths) {
-  if (filePaths.length > 0) {
-    const assistant = await openai.beta.assistants.create({
-    name: 'File Scanner',
-    instructions: "You summarize the office hours from the course syllabuses uploaded. Order by day of the week, followed by course name in bold, the hours, instructor\'s name, location.",
-    model: "gpt-4o-mini",
-    tools: [{ type: 'file_search'}],
-    });
 
-    const attachment_files = [];
-    for (let filePath of filePaths) {
-      const f = await openai.files.create({
-        file: fs.createReadStream(filePath),
-        purpose: 'assistants', 
-      });
-      attachment_files.push({
-        file_id: f.id,
-        tools: [{ type: 'file_search'}]
-      });
-    }
 
-    const thread = await openai.beta.threads.create({
-      messages: [
-        {
-          role: 'user',
-          content: 'Summarize the office hours. Order by day of the week, followed by course name in bold, the hours, instructor\'s name, location. For any course whose Office Hours are not found or listed as TBA, respond as follows \' No Office Hours found.\' Add 2 new lines for each new day of the week. Add a new line for citation at the bottom',
-          attachments: attachment_files,
-        }
-      ]
-    });
-    const run = await openai.beta.threads.runs.createAndPoll(thread.id, {
-      assistant_id: assistant.id,
-    });
+async function sendFilesToOpenAI(s3Urls, fileNames) {
+  console.log("s3Urls are", s3Urls);
+  console.log("fileNames are", fileNames);
+  try {
+    // Step 1: Download all files from S3
+      const uploadPromises = s3Urls.map(async (url, index) => {
+            const response = await axios({
+                url,
+                method: "GET",
+                responseType: "arraybuffer",
+            });
+           //const buffer = Buffer.from(response.data);
+           const blob = new Blob([response.data], { type: 'application/pdf' });
+           const formData = new FormData();
+           formData.append('file', blob, fileNames[index]);
+           
+           const uploadedFile = await openai.files.create({
+            file: formData.get('file'),
+            purpose: "assistants",
+           });
+           console.log("File created in OpenAI");
+           return uploadedFile.id;
+        });
 
-    const messages = await openai.beta.threads.messages.list(thread.id, {
-      run_id: run.id,
-    });
-    const message = messages.data.pop();
-    if (message && message.content[0].type === 'text') {
-      const { text } = message.content[0];
-      const { annotations } = text;
-      const citations = [];
-
-      let index = 0;
-      for (let annotation of annotations) {
-        text.value = text.value.replace(annotation.text, "[" + index + "]");
-        const { file_citation } = annotation;
-        if (file_citation) {
-          const citedFile = await openai.files.retrieve(file_citation.file_id);
-          citations.push("[" + index + "]" + citedFile.filename);
-        }
-        index++;
-      }
-      return text.value;
+        const fileIds = await Promise.all(uploadPromises);
+        console.log("Files uploaded to OpenAI:", fileIds);
+        return fileIds;
+  } catch (error) {
+      console.error("Error sending files to OpenAI:", error);
+      throw new Error("Failed to send files to OpenAI");
   }
-  }
+}
+
+async function sendMessageToAssistant(fileIds) {
   
-};
+  try {
+    const thread = await openai.beta.threads.create();
+    const message = await openai.beta.threads.messages.create(
+      thread.id,
+      {
+        role: "user",
+        content: "Here are the course syllabi",
+        attachments: fileIds.map(id => ({
+          file_id: id,
+          tools: [{ type: 'file_search' }]
+        })),
+      }
+    );
+    const run = await openai.beta.threads.runs.createAndPoll(
+      thread.id,
+      {
+        assistant_id: process.env.OPENAI_ASSISTANT_ID,
+      }
+    );
+    return run.thread_id;
+  } catch (error) {
+    console.error("Error sending message to assistant:", {
+      error: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
+    throw new Error("Failed to send message to assistant");
+  }
+}
+
+async function getHours(thread_id) {
+  try {
+  const messages = await openai.beta.threads.messages.list(thread_id);
+  if (!messages.data || messages.data.length === 0) {
+    throw new Error("No messages found in thread");
+  }
+
+  const message = messages.data[0];
+  if (!message.content || message.content.length === 0) {
+    throw new Error("Message content is empty");
+  }
+  return message.content[0].text.value;
+ } catch (error) {
+    console.error("Error getting hours:", error);
+    throw new Error("Failed to get hours");
+  }
+
+}
 
 async function clearStorage() {
   const fileList = await openai.files.list();
@@ -84,7 +112,7 @@ async function clearStorage() {
   }
 }
 
-export { getHours, clearStorage }
+export { sendFilesToOpenAI, sendMessageToAssistant, getHours, clearStorage }
 
 
 
