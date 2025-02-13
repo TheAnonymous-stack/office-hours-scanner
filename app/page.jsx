@@ -10,85 +10,93 @@ export default function HomePage() {
   const [text, setText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [fileUploaded, setFileUploaded] = useState([]);
-  const [paths, setPaths] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  async function handleDeleteSingle(fileName, filePath) {
-    const formData = new FormData();
-    formData.append('path', filePath);
-    const response = await fetch("/api/file", {
-        method: "DELETE",
-        body: formData,
-    });
-    setFileUploaded(fileUploaded.filter(f => f !== fileName));
-    setPaths(paths.filter(p => p !== filePath));
+  // Handle file input
+  const handleFileChange = (e) => {
+    setFileUploaded(Array.from(e.target.files));
   }
 
-  async function handleDeleteAll(filePaths) {
-    for (let path of filePaths) {
+  // Upload files to backend
+  const handleUpload = async () => {
+    if (fileUploaded.length === 0) return;
+    setLoading(true);
+    try {
       const formData = new FormData();
-      formData.append('path', path);
-      const response = await fetch("/api/file", {
-          method: "DELETE",
-          body: formData,
+      fileUploaded.forEach(file => {
+        formData.append("file", file);
       });
+
+      console.log("Files uploaded: ", fileUploaded.map(f => f.name));
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        console.log("Files uploaded successfully");
+      } else {
+        console.error("Failed to upload files", {
+          status: res.status,
+          statusText: res.statusText,
+          error: data.error || data
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading files:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
-  useEffect(() => {
-    if (text.length > 0) {
-      setIsModalOpen(false);
-      handleDeleteAll(paths);
-      clearStorage();
-    }
-  }, [text]);
+  const handleFileRemove = (file) => {
+    setFileUploaded(fileUploaded.filter(f => f !== file));
+  }
   
   return (
     <div className="flex flex-col gap-5 p-10">
       <h1 className="flex justify-center text-4xl font-bold">Office Hours Scanner</h1>
-      <UploadForm paths={paths} fileUploaded={fileUploaded}  setIsModalOpen={setIsModalOpen} setFileUploaded={setFileUploaded} setPaths={setPaths}/>
+      <UploadForm fileUploaded={fileUploaded} handleFileChange={handleFileChange} handleUpload={handleUpload}/>
       {
         fileUploaded.length > 0 && 
         <div className='flex flex-col'>
           <h2 className='text-2xl font-bold mb-5'>Files Uploaded:</h2>
-          {
-            fileUploaded.map((f) => 
-            <div key={f} className='flex flex-row justify-between w-1/2 border-black border-b py-2 mb-2'>
-              <p className='font-semibold'>{f}</p>
-              <button 
-                className="hover:text-red-500 hover:font-bold" 
-                onClick={() => {
-                    let path = paths.find(p => p.includes(f))
-                    if (path) {
-                      handleDeleteSingle(f, path);
-                    }
+          {fileUploaded.length > 0 && (
+            <div>
+              <ul>
+                {
+                  fileUploaded.map((f) => (
+                  <div key={f.name} className='flex flex-row justify-between w-1/2 border-black border-b py-2 mb-2'>
+                    <p className='font-semibold text-lg text-black'>{f.name}</p>
+                    <button className='text-lg px-4 py-2 rounded-md' onClick={() =>handleFileRemove(f)}>X</button>
+                  </div>
+                  ))
                 }
-                 }>Remove</button>
+              </ul>
+              
             </div>
-            )
+           
+          )
+
           }
         </div>
       }
-      {
-        paths.length > 0 && 
-            <button 
-                className='flex justify-center align-center mt-1 py-4 px-10 rounded-md bg-blue-600 text-white font-semibold'
-                onClick={() => {
-                const hours = getHours(paths);
-                setIsModalOpen(true);
-                hours.then((res) => {
-                    if (res) setText(res);
-                })
-                
-                }}>Scan Office Hours
-            </button>
-      }
+
+      <button onClick={handleUpload} disabled={loading} 
+        className='bg-blue-500 text-white px-4 py-2 rounded-md'
+      >
+        {loading ? "Uploading..." : "Scan Office Hours"}
+      </button>
+
       {
         text.length > 0 && 
         <div className="p-2 mt-5 border rounded-xl w-2/3">
           <Markdown>{text}</Markdown>
         </div>
       }
-      <LoadingModal isModalOpen={isModalOpen}/>
+      <LoadingModal isModalOpen={loading}/>
     </div>
   )
 }
